@@ -1,5 +1,4 @@
 ﻿using Bogus;
-using Domain.Entities;
 
 namespace Application.FunctionalTests.Mocks.Fakes;
 public static class FakeProducts

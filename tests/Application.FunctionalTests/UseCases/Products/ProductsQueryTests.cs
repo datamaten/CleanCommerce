@@ -1,47 +1,35 @@
-﻿using Application.FunctionalTests.Mocks;
+﻿using Application.Common.Exceptions;
 using Application.UseCases.Products.Queries.GetProducts;
-using Domain.Entities;
 
-namespace Application.FunctionalTests.UseCases.Products
+namespace Application.FunctionalTests.UseCases.Products;
+
+public class ProductsQueryTests(QueryCollectionFixture fixture) : QueryTestBase(fixture)
 {
-    [Collection("QueryCollection")]
-    public class ProductsQueryTests(QueryCollectionFixture fixture) : QueryTestBase(fixture)
+    [Fact]
+    public async Task Should_Return_Product()
     {
-        [Fact]
-        public async Task ShouldReturnPriorityLevels()
-        {
-            var query = new GetProductById() { Id = 9 };
+        var excpeced = await FirstOrDefaultAsync<Product>(1);
+        excpeced.Should().NotBeNull();
 
-            var result = await SendAsync(query);
+        var result = await SendAsync(new GetProductById() { Id = excpeced!.Id });
 
+        result.Should()
+            .BeAssignableTo<ProductDto>()
+            .And.BeEquivalentTo(excpeced, opt => opt
+            .ExcludingMissingMembers());
+    }
 
-            result.Should().NotBeNull();
-        }
+    [Fact]
+    public async Task Should_Throw_NotFoundException()
+    {
+        Func<Task> act = () => SendAsync(new GetProductById() { Id = int.MaxValue });
+        await act.Should().ThrowAsync<NotFoundException>();
+    }
 
-        [Fact]
-        public async Task ShouldReturnPriorityLevsels()
-        {
-            var query = new GetProductById() { Id = 9 };
-
-            var result = await SendAsync(query);
-
-
-            result.Should().NotBeNull();
-        }
-
-        [Fact]
-        public async Task ShouldReturnPrissorityLevsels()
-        {
-            var query = new GetProductById() { Id = 1 };
-
-            var result = await SendAsync(query);
-
-
-            result.Should().NotBeNull();
-
-            var count = await CountAsync<Product>();
-
-            count.Should().Be(10);
-        }
+    [Fact]
+    public async Task Should_Throw_ValidationException()
+    {
+        Func<Task> act = () => SendAsync(new GetProductById());
+        await act.Should().ThrowAsync<ValidationException>();
     }
 }

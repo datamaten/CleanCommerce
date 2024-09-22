@@ -1,37 +1,41 @@
-﻿using System.Reflection;
+﻿using System.Data.Common;
+using System.Reflection;
+using Application.Common.Behaviours;
 using Application.Common.Interfaces;
+using Application.FunctionalTests.Mocks;
 using FluentValidation;
+using MediatR;
 using Microsoft.EntityFrameworkCore;
-using Microsoft.EntityFrameworkCore.Sqlite.Infrastructure.Internal;
 using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.Logging;
 using Persistence.Context;
 
 namespace Application.FunctionalTests.Factory;
-public class TestServiceProviderFactory
+
+public static class TestServiceProviderFactory
 {
-    public static IServiceProvider Create(DbContextOptions<ApplicationDbContext> dbContextOptions, params Assembly[] assemblies)
+    private static readonly Assembly ApplicationAssembly = typeof(IApplicationDbContext).Assembly;
+    public static IServiceProvider Create(DbConnection connection)
     {
         var services = new ServiceCollection();
 
-        // Tilføj DbContext
-        services.AddDbContext<ApplicationDbContext>(options =>
-            options.UseSqlite(dbContextOptions.FindExtension<SqliteOptionsExtension>().Connection));
+        services.AddDbContext<ApplicationDbContext>((_, options) => options.UseSqlite(connection));
 
-        // Registrer IApplicationDbContext
         services.AddScoped<IApplicationDbContext>(provider =>
             provider.GetRequiredService<ApplicationDbContext>());
 
-        // Tilføj AutoMapper
-        services.AddAutoMapper(assemblies);
+        services.AddAutoMapper(ApplicationAssembly);
 
-        // Tilføj FluentValidation
-        services.AddValidatorsFromAssemblies(assemblies);
+        services.AddValidatorsFromAssembly(ApplicationAssembly);
 
-        // Tilføj MediatR
-        services.AddMediatR(cfg => cfg.RegisterServicesFromAssemblies(assemblies));
+        services.AddMediatR(cfg => {
+            cfg.RegisterServicesFromAssembly(ApplicationAssembly);
+            cfg.AddBehavior(typeof(IPipelineBehavior<,>), typeof(UnhandledExceptionBehaviour<,>));
+            cfg.AddBehavior(typeof(IPipelineBehavior<,>), typeof(ValidationBehaviour<,>));
+        });
 
-        // Tilføj andre services efter behov
-        // services.AddScoped<IYourService, YourService>();
+
+        services.AddLogging(builder => builder.AddProvider(new MockLoggerProvider()));
 
         return services.BuildServiceProvider();
     }
