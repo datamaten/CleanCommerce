@@ -1,7 +1,9 @@
-﻿using MediatR;
+﻿using Domain.Common;
+using MediatR;
 
 namespace Application.FunctionalTests.Fixtures;
 
+[Collection("QueryCollection")]
 public abstract class QueryTestBase : IClassFixture<QueryCollectionFixture>
 {
     protected readonly QueryCollectionFixture _fixture;
@@ -20,6 +22,12 @@ public abstract class QueryTestBase : IClassFixture<QueryCollectionFixture>
         where TEntity : class
     {
         return await QueryCollectionFixture.FindAsync<TEntity>(keyValues);
+    }
+
+    protected static async Task<TEntity?> FirstOrDefaultAsync<TEntity>(int id)
+        where TEntity : BaseEntity
+    {
+        return await QueryCollectionFixture.FirstOrDefaultAsync<TEntity>(id);
     }
 
     protected static async Task AddAsync<TEntity>(TEntity entity)

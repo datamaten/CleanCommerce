@@ -1,5 +1,4 @@
-﻿using System.Reflection;
-using Application.FunctionalTests.Factory;
+﻿using Application.FunctionalTests.Factory;
 using Microsoft.Data.Sqlite;
 using Microsoft.EntityFrameworkCore;
 using Persistence.Context;
@@ -11,12 +10,10 @@ public class SqliteTestDatabase : IAsyncDisposable
     private const string InMemoryConnectionString = "DataSource=:memory:";
     private readonly SqliteConnection _connection;
     private readonly DbContextOptions<ApplicationDbContext> _contextOptions;
-    private readonly Assembly[] _assemblies;
+    private bool _disposed;
 
-    public SqliteTestDatabase(params Assembly[] assemblies)
+    public SqliteTestDatabase()
     {
-        _assemblies = assemblies;
-
         _connection = new SqliteConnection(InMemoryConnectionString);
         _connection.Open();
 
@@ -35,12 +32,30 @@ public class SqliteTestDatabase : IAsyncDisposable
 
     public IServiceProvider CreateServiceProvider()
     {
-        return TestServiceProviderFactory.Create(_contextOptions, _assemblies);
+        return TestServiceProviderFactory.Create(_connection);
     }
 
     public async ValueTask DisposeAsync()
     {
-        await _connection.CloseAsync();
-        await _connection.DisposeAsync();
+        await DisposeAsyncCore().ConfigureAwait(false);
+        GC.SuppressFinalize(this);
+    }
+
+    protected virtual async ValueTask DisposeAsyncCore()
+    {
+        if (_disposed)
+        {
+            return;
+        }
+
+        await _connection.CloseAsync().ConfigureAwait(false);
+        await _connection.DisposeAsync().ConfigureAwait(false);
+
+        _disposed = true;
+    }
+
+    ~SqliteTestDatabase()
+    {
+        DisposeAsyncCore().AsTask().GetAwaiter().GetResult();
     }
 }

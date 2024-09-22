@@ -1,4 +1,4 @@
-﻿using Application.Common.Interfaces;
+﻿using Domain.Common;
 using MediatR;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.DependencyInjection;
@@ -10,14 +10,13 @@ public abstract class TestBase : IAsyncLifetime
 {
     private readonly SqliteTestDatabase _database;
     protected readonly IServiceProvider _serviceProvider;
-    private static IServiceScopeFactory scopeFactory = default!;
+    private static IServiceScopeFactory ScopeFactory = default!;
 
     protected TestBase()
     {
-        var applicationAssembly = typeof(IApplicationDbContext).Assembly;
-        _database = new SqliteTestDatabase(applicationAssembly);
+        _database = new SqliteTestDatabase();
         _serviceProvider = _database.CreateServiceProvider();
-        scopeFactory = _serviceProvider.GetRequiredService<IServiceScopeFactory>();
+        ScopeFactory = _serviceProvider.GetRequiredService<IServiceScopeFactory>();
     }
 
     public virtual Task InitializeAsync()
@@ -37,7 +36,7 @@ public abstract class TestBase : IAsyncLifetime
 
     public static async Task<TResponse> SendAsync<TResponse>(IRequest<TResponse> request)
     {
-        using var scope = scopeFactory.CreateScope();
+        using var scope = ScopeFactory.CreateScope();
         var mediator = scope.ServiceProvider.GetRequiredService<ISender>();
         return await mediator.Send(request);
     }
@@ -45,15 +44,26 @@ public abstract class TestBase : IAsyncLifetime
     public static async Task<TEntity?> FindAsync<TEntity>(params object[] keyValues)
         where TEntity : class
     {
-        using var scope = scopeFactory.CreateScope();
+        using var scope = ScopeFactory.CreateScope();
         var context = scope.ServiceProvider.GetRequiredService<ApplicationDbContext>();
         return await context.Set<TEntity>().FindAsync(keyValues);
+    }
+
+    public static async Task<TEntity?> FirstOrDefaultAsync<TEntity>(int id)
+    where TEntity : BaseEntity
+    {
+        using var scope = ScopeFactory.CreateScope();
+        var context = scope.ServiceProvider.GetRequiredService<ApplicationDbContext>();
+
+        return await context.Set<TEntity>()
+            .AsNoTracking()
+            .FirstOrDefaultAsync(e => e.Id == id);
     }
 
     public static async Task AddAsync<TEntity>(TEntity entity)
         where TEntity : class
     {
-        using var scope = scopeFactory.CreateScope();
+        using var scope = ScopeFactory.CreateScope();
         var context = scope.ServiceProvider.GetRequiredService<ApplicationDbContext>();
         context.Set<TEntity>().Add(entity);
         await context.SaveChangesAsync(CancellationToken.None);
@@ -61,7 +71,7 @@ public abstract class TestBase : IAsyncLifetime
 
     public static async Task<int> CountAsync<TEntity>() where TEntity : class
     {
-        using var scope = scopeFactory.CreateScope();
+        using var scope = ScopeFactory.CreateScope();
         var context = scope.ServiceProvider.GetRequiredService<ApplicationDbContext>();
 
         return await context.Set<TEntity>().CountAsync();

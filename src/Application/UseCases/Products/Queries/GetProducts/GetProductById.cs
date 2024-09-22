@@ -1,5 +1,4 @@
-﻿using Application.Common.Exceptions;
-using Application.Common.Interfaces;
+﻿using Application.Common.Interfaces;
 
 namespace Application.UseCases.Products.Queries.GetProducts;
 public record GetProductById : IRequest<ProductDto>
@@ -14,13 +13,7 @@ public class GetProductByIdHandler(IApplicationDbContext context, IMapper mapper
         var entity = await context.Products
             .FindAsync([request.Id], cancellationToken);
 
-
-        var items = context.Products.ToList();
-
-
-
-        if(entity == null)
-            throw new NotFoundException(request.Id.ToString(), "Products");
+        Guard.NotFound(request.Id, entity);
 
         return mapper.Map<ProductDto>(entity);
 

@@ -8,13 +8,13 @@
 
   <ItemGroup>
     <Compile Include=".Factory\TestServiceProviderFactory.cs" />
-    <Compile Include=".Fixtures\QueryCollection.cs" />
     <Compile Include=".Fixtures\QueryCollectionFixture.cs" />
     <Compile Include=".Fixtures\QueryTestBase.cs" />
     <Compile Include=".Fixtures\SqliteTestDatabase.cs" />
     <Compile Include=".Fixtures\TestBase.cs" />
     <Compile Include=".Mocks\FakeItems.cs" />
     <Compile Include=".Mocks\Fakes\FakeProducts.cs" />
+    <Compile Include=".Mocks\MockLoggerProvider.cs" />
   </ItemGroup>
 
   <ItemGroup>
