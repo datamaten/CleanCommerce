@@ -17,7 +17,7 @@ public static class DependencyInjection
         services.AddScoped<ISaveChangesInterceptor, AuditableEntityInterceptor>();
         services.AddDbContext<ApplicationDbContext>((_, options) => options.UseSqlServer(connectionString));
         services.AddScoped<IApplicationDbContext>(provider => provider.GetRequiredService<ApplicationDbContext>());
-        services.AddScoped<ApplicationDbContextInitialiser>();
+        services.AddScoped<IApplicationDbContextInitialiser, ApplicationDbContextInitialiser>();
         services.AddSingleton(TimeProvider.System);
 
         return services;

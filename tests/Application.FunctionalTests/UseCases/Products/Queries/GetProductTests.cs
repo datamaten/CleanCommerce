@@ -1,9 +1,9 @@
 ﻿using Application.Common.Exceptions;
 using Application.UseCases.Products.Queries.GetProducts;
 
-namespace Application.FunctionalTests.UseCases.Products;
+namespace Application.FunctionalTests.UseCases.Products.Queries;
 
-public class ProductsQueryTests(QueryCollectionFixture fixture) : QueryTestBase(fixture)
+public class GetProductTests : QueryFixture
 {
     [Fact]
     public async Task Should_Return_Product()
@@ -13,7 +13,7 @@ public class ProductsQueryTests(QueryCollectionFixture fixture) : QueryTestBase(
 
         var result = await SendAsync(new GetProductById() { Id = excpeced!.Id });
 
-        result.Should()
+            result.Should()
             .BeAssignableTo<ProductDto>()
             .And.BeEquivalentTo(excpeced, opt => opt
             .ExcludingMissingMembers());
@@ -31,5 +31,12 @@ public class ProductsQueryTests(QueryCollectionFixture fixture) : QueryTestBase(
     {
         Func<Task> act = () => SendAsync(new GetProductById());
         await act.Should().ThrowAsync<ValidationException>();
+    }
+
+    [Fact]
+    public async Task Should_Throw_Nion()
+    {
+        var count = await CountAsync<Product>();
+        count.Should().Be(10);
     }
 }
