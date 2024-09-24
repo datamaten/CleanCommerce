@@ -7,14 +7,14 @@
   </PropertyGroup>
 
   <ItemGroup>
+    <Compile Include=".Data\Entities\FakeProducts.cs" />
+    <Compile Include=".Data\FakeEntities.cs" />
     <Compile Include=".Fixtures\CommandFixture.cs" />
     <Compile Include=".Fixtures\QueryFixture.cs" />
     <Compile Include=".Fixtures\FixtureBase.cs" />
     <Compile Include=".Mocks\MockApplicationDbContextInitialiser.cs" />
     <Compile Include=".Factory\CustomWebApplicationFactory.cs" />
     <Compile Include=".Database\SqliteDatabase.cs" />
-    <Compile Include=".Fake\FakeEntities.cs" />
-    <Compile Include=".Fake\Entities\FakeProducts.cs" />
   </ItemGroup>
 
   <ItemGroup>

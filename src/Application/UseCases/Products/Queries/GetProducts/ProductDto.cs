@@ -9,7 +9,7 @@ public class ProductDto
     public string Description { get; set; } = string.Empty;
     public decimal Price { get; set; }
 
-    sealed class Mapping : Profile
+    public class Mapping : Profile
     {
         public Mapping()
         {

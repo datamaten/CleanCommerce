@@ -16,6 +16,5 @@ public class GetProductByIdHandler(IApplicationDbContext context, IMapper mapper
         Guard.NotFound(request.Id, entity);
 
         return mapper.Map<ProductDto>(entity);
-
     }
 }
