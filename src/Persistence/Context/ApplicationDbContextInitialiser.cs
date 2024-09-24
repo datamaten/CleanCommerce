@@ -12,7 +12,7 @@ public static class InitialiserExtensions
     {
         using var scope = app.Services.CreateScope();
 
-        var initialiser = scope.ServiceProvider.GetRequiredService<ApplicationDbContextInitialiser>();
+        var initialiser = scope.ServiceProvider.GetRequiredService<IApplicationDbContextInitialiser>();
 
         await initialiser.InitialiseAsync();
 
@@ -20,7 +20,7 @@ public static class InitialiserExtensions
     }
 }
 
-public class ApplicationDbContextInitialiser(ApplicationDbContext context, ILogger<ApplicationDbContextInitialiser> logger)
+public class ApplicationDbContextInitialiser(ApplicationDbContext context, ILogger<ApplicationDbContextInitialiser> logger) : IApplicationDbContextInitialiser
 {
     public async Task InitialiseAsync()
     {
@@ -56,7 +56,7 @@ public class ApplicationDbContextInitialiser(ApplicationDbContext context, ILogg
             {
                 Name = "My first product",
                 Description = "This is my first product, get it now!",
-                Price   = 99,
+                Price = 99,
             });
 
             await context.SaveChangesAsync();
