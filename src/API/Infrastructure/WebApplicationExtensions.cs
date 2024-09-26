@@ -24,14 +24,18 @@ public static class WebApplicationExtensions
         var endpointGroupTypes = assembly.GetExportedTypes()
             .Where(t => t.IsSubclassOf(endpointGroupType));
 
+        // Get IHttpContextAccessor from services
+        var httpContextAccessor = app.Services.GetRequiredService<IHttpContextAccessor>();
+
         foreach (var type in endpointGroupTypes)
         {
             if (Activator.CreateInstance(type) is EndpointGroupBase instance)
             {
+                // Set IHttpContextAccessor to allow accessing HttpContext
+                instance.SetHttpContextAccessor(httpContextAccessor);
                 instance.Map(app);
             }
         }
-
         return app;
     }
 }

@@ -1,10 +1,18 @@
-﻿using System.Diagnostics.CodeAnalysis;
-
-namespace Application.Common.Exceptions;
+﻿namespace Application.Common.Exceptions;
 
 public class NotFoundException : Exception
 {
+    public NotFoundException() {}
 
+    public NotFoundException(string message)
+        : base(message)
+    {
+    }
+
+    public NotFoundException(string message, Exception innerException)
+        : base(message, innerException)
+    {
+    }
     public NotFoundException(string key, string objectName)
         : base($"Queried object {objectName} was not found, Key: {key}")
     {
