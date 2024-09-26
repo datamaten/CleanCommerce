@@ -1,4 +1,5 @@
-﻿using Application.UseCases.Products.Commands.CreateProduct;
+﻿using API.Services;
+using Application.UseCases.Products.Commands.CreateProduct;
 using Application.UseCases.Products.Commands.DeleteProduct;
 using Application.UseCases.Products.Commands.UpdateProduct;
 using Application.UseCases.Products.Queries.GetProducts;
@@ -36,7 +37,7 @@ public class Products : EndpointGroupBase
 
     public async Task<IResult> UpdateProduct(ISender sender, int id, UpdateProductCommand command)
     {
-        if (id != command.Id) return Results.BadRequest();
+        ApiGuard.ThrowIfIdMismatch(id, command.Id);
         await sender.Send(command);
         return Results.NoContent();
     }

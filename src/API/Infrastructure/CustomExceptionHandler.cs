@@ -15,6 +15,7 @@ public class CustomExceptionHandler : IExceptionHandler
                 { typeof(ValidationException), HandleValidationException },
                 { typeof(NotFoundException), HandleNotFoundException },
                 { typeof(UnauthorizedAccessException), HandleUnauthorizedAccessException },
+                {typeof(ApiGuardException), HandleApiGuardException },
             };
     }
 
@@ -56,6 +57,21 @@ public class CustomExceptionHandler : IExceptionHandler
             Type = "https://tools.ietf.org/html/rfc7231#section-6.5.4",
             Title = "The specified resource was not found.",
             Detail = exception.Message
+        });
+    }
+    private async Task HandleApiGuardException(HttpContext httpContext, Exception ex)
+    {
+        var exception = (ApiGuardException)ex;
+
+        httpContext.Response.StatusCode = StatusCodes.Status400BadRequest;
+
+        await httpContext.Response.WriteAsJsonAsync(new ProblemDetails()
+        {
+            Status = StatusCodes.Status400BadRequest,
+            Type = "https://tools.ietf.org/html/rfc7231#section-6.5.1",
+            Title = "The request could not be completed due to a conflict with the current state of the resource.",
+            Detail = exception.Message
+
         });
     }
 
