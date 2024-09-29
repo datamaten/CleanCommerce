@@ -1,10 +1,7 @@
 ﻿using Application.Common.Interfaces;
 
 namespace Application.UseCases.Products.Queries.GetProducts;
-public record GetProductById : IRequest<ProductDto>
-{
-    public int Id { get; set; }
-}
+public record GetProductById(int Id) : IRequest<ProductDto>;
 
 public class GetProductByIdHandler(IApplicationDbContext context, IMapper mapper) : IRequestHandler<GetProductById, ProductDto>
 {

@@ -2,7 +2,7 @@
 using Microsoft.AspNetCore.Diagnostics;
 using Microsoft.AspNetCore.Mvc;
 
-namespace API.Infrastructure;
+namespace API.Middleware;
 
 public class CustomExceptionHandler : IExceptionHandler
 {
@@ -10,7 +10,7 @@ public class CustomExceptionHandler : IExceptionHandler
 
     public CustomExceptionHandler()
     {
-            _exceptionHandlers = new()
+        _exceptionHandlers = new()
             {
                 { typeof(ValidationException), HandleValidationException },
                 { typeof(NotFoundException), HandleNotFoundException },

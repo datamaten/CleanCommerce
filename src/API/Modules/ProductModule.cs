@@ -1,32 +1,30 @@
-﻿using API.Services;
+﻿using API.Extensions;
+using API.Modules.Base;
+using API.Services;
 using Application.UseCases.Products.Commands.CreateProduct;
 using Application.UseCases.Products.Commands.DeleteProduct;
 using Application.UseCases.Products.Commands.UpdateProduct;
 using Application.UseCases.Products.Queries.GetProducts;
 
-namespace API.Endpoints;
+namespace API.Modules;
 
-public class Products : EndpointGroupBase
+public class ProductModule : Module
 {
+    public override ModuleConfiguration Configuration => new("Products");
+
     public override void Map(WebApplication app)
     {
-        app.MapGroup(this)
+        app.MapModule(Configuration)
             .AllowAnonymous()
-            .MapGet(GetProduct)
-            .MapGet(GetProductById, "{id}")
+            .MapGet(GetProduct, "{id}")
             .MapPost(CreateProduct)
             .MapPut(UpdateProduct, "{id}")
             .MapDelete(DeleteProduct, "{id}");
     }
 
-    public Task<ProductDto> GetProduct(ISender sender, [AsParameters] GetProductById query)
+    public Task<ProductDto> GetProduct(ISender sender, int id)
     {
-        return sender.Send(query);
-    }
-
-    public Task<ProductDto> GetProductById(ISender sender, int id)
-    {
-        return sender.Send(new GetProductById { Id = id});
+        return sender.Send(new GetProductById(id));
     }
 
     public async Task<IResult> CreateProduct(ISender sender, CreateProductCommand command)
@@ -35,9 +33,9 @@ public class Products : EndpointGroupBase
         return Results.Created();
     }
 
-    public async Task<IResult> UpdateProduct(ISender sender, int id, UpdateProductCommand command)
+    public async Task<IResult> UpdateProduct(ISender sender, IApiGuard guard, int id, UpdateProductCommand command)
     {
-        ApiGuard.ThrowIfIdMismatch(id, command.Id);
+        guard.ValidateIds(id, command.Id);
         await sender.Send(command);
         return Results.NoContent();
     }
