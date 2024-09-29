@@ -2,17 +2,14 @@
 
 namespace API.Services;
 
-public class ApiGuard(IHttpContextAccessor httpContextAccessor)
+public class ApiGuard(IHttpContextAccessor httpContextAccessor) : IApiGuard
 {
-    public void ThrowIfIdMismatch(int expectedId, int actualId)
+    public void ValidateIds(int expectedId, int actualId)
     {
         if (expectedId != actualId)
         {
             var path = httpContextAccessor.HttpContext?.Request.Path.ToString();
-            throw new ApiGuardException($"The provided key '{actualId}' does not match the expected key '{expectedId}'.")
-            {
-                Data = { ["Instance"] = path }
-            };
+            throw new ApiGuardException($"The route id '{expectedId}' in '{path}' does not match the id '{actualId}' provided in the request.");
         }
     }
 }

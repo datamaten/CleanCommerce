@@ -4,6 +4,8 @@ using Microsoft.AspNetCore.Mvc;
 using NSwag.Generation.Processors;
 using Persistence.Context;
 using NJsonSchema;
+using NSwag;
+using API.Middleware;
 
 namespace API;
 
@@ -12,22 +14,38 @@ public static class DependencyInjection
     public static IServiceCollection AddApiServices(this IServiceCollection services)
     {
         services.AddScoped<IUser, CurrentUser>();
+        services.AddScoped<IApiGuard, ApiGuard>();
         services.AddHttpContextAccessor();
         services.AddHealthChecks()
             .AddDbContextCheck<ApplicationDbContext>();
 
-        services.AddScoped<ApiGuard>();
         services.AddExceptionHandler<CustomExceptionHandler>();
         services.Configure<ApiBehaviorOptions>(options =>
             options.SuppressModelStateInvalidFilter = true);
 
         services.AddEndpointsApiExplorer();
-        services.AddOpenApiDocument((configure, sp) =>
-        {
-            configure.Title = "Your API Name";
-            configure.Version = "v1";
+        services.AddApiDocument();
 
-            configure.OperationProcessors.Add(new OperationProcessor(context =>
+        services.AddHttpContextAccessor();
+
+        return services;
+    }
+
+    public static IServiceCollection AddApiDocument(this IServiceCollection services)
+    {
+        services.AddOpenApiDocument(options =>
+        {
+            options.PostProcess = document =>
+            {
+                document.Info = new OpenApiInfo
+                {
+                    Version = "v1",
+                    Title = "Clean Commerce API",
+                    Description = "An API for managing Clean Commerce",
+                };
+            };
+
+            options.OperationProcessors.Add(new OperationProcessor(context =>
             {
                 context.OperationDescription.Operation.Responses
                     .Where(r => int.TryParse(r.Key, out var statusCode) && statusCode >= 400)
@@ -37,8 +55,6 @@ public static class DependencyInjection
                 return true;
             }));
         });
-
-        services.AddHttpContextAccessor();
 
         return services;
     }

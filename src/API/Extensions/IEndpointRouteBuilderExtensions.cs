@@ -1,7 +1,8 @@
 ﻿using System.Diagnostics.CodeAnalysis;
-using System;
+using API.Extensions;
+using Microsoft.AspNetCore.Mvc;
 
-namespace API.Infrastructure;
+namespace API.Extensions;
 
 public static class IEndpointRouteBuilderExtensions
 {
@@ -9,6 +10,7 @@ public static class IEndpointRouteBuilderExtensions
     {
         builder.MapGet(pattern, handler)
             .WithName(handler.Method.Name)
+            .WithMetadata(new ProducesResponseTypeAttribute(StatusCodes.Status200OK))
             .ProducesValidationProblem()
             .ProducesProblem(StatusCodes.Status400BadRequest)
             .ProducesProblem(StatusCodes.Status404NotFound)
@@ -21,6 +23,7 @@ public static class IEndpointRouteBuilderExtensions
     {
         builder.MapPost(pattern, handler)
             .WithName(handler.Method.Name)
+            .WithMetadata(new ProducesResponseTypeAttribute(StatusCodes.Status201Created))
             .ProducesValidationProblem()
             .ProducesProblem(StatusCodes.Status400BadRequest)
             .ProducesProblem(StatusCodes.Status404NotFound)
@@ -33,6 +36,7 @@ public static class IEndpointRouteBuilderExtensions
     {
         builder.MapPut(pattern, handler)
             .WithName(handler.Method.Name)
+            .WithMetadata(new ProducesResponseTypeAttribute(StatusCodes.Status204NoContent))
             .ProducesValidationProblem()
             .ProducesProblem(StatusCodes.Status400BadRequest)
             .ProducesProblem(StatusCodes.Status404NotFound)
@@ -45,6 +49,7 @@ public static class IEndpointRouteBuilderExtensions
     {
         builder.MapDelete(pattern, handler)
             .WithName(handler.Method.Name)
+            .WithMetadata(new ProducesResponseTypeAttribute(StatusCodes.Status204NoContent))
             .ProducesValidationProblem()
             .ProducesProblem(StatusCodes.Status400BadRequest)
             .ProducesProblem(StatusCodes.Status404NotFound)
